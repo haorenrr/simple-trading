@@ -221,4 +221,20 @@ function testTime(){
     console.log(a)
 
 }
-testTime()
+//testTime()
+
+function testObject(){
+    let person = {
+        name:'Tom',
+        age:25,
+        sex:'male',
+    }
+    console.log("person=")
+    console.log(person)
+
+    delete person["name"];
+    console.log(person, "\n========")
+
+
+}
+testObject()

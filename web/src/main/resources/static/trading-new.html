@@ -235,8 +235,11 @@
                 </div>
             </li>
         </ul>
+        <div class="navbar-nav">
+            <a class="nav-link" href="cs.html" target="_blank">Simulator</a>
+        </div>
         <form class="">
-            <div class="input-group me-2">
+            <div class="input-group mx-2">
                 <input class="form-control" id="nav-search" type="text" placeholder="Search...">
                 <button class="btn btn-success" type="submit">Search</button>
             </div>
@@ -620,7 +623,7 @@
         },
         setup(){
             const chartInst = shallowRef(null);
-            const chartData = ref({})
+            const chartData = {}
             let tickTimer = null
 
             const initChart = () => {
@@ -628,7 +631,7 @@
                 chartInst.value = echarts.init(chartDom);
                 const now = Date.now();
                 const start = now - 1 * 60 * 1000
-                const future = now + 9 * 60 * 1000;//10分钟
+                const future = now + 30 * 60 * 1000;//10分钟
                 const options = {
                     grid: { // 调整图表的边距，否则图标会被挤在中间
                         top: '10%', bottom: '10%', left: '5%', right: '5%',
@@ -664,6 +667,32 @@
                             color: '#999'
                         }
                     },
+                    // 开启提示框
+                    tooltip: {
+                        trigger: 'axis',          // 坐标轴触发，这样鼠标悬停在曲线上任何位置都能显示
+                        axisPointer: {            // 配置指示器
+                            type: 'cross',        // 指示器类型：'line' 是直线，'cross' 是十字准星（含横纵两条虚线）
+                            label: {
+                                backgroundColor: '#6a7985' // 坐标轴标签的背景色
+                            }
+                        }
+                    },
+                    // 配置 dataZoom (slide 模式)
+                    dataZoom: [
+                        {
+                            type: 'slider',       // 使用滑动条模式
+                            start: 0,
+                            end: 100
+                        }
+                    ],
+                    axisPointer: {
+                        type: 'line',
+                        lineStyle: {
+                            color: '#ef4444',    // 虚线颜色
+                            width: 1,            // 虚线宽度
+                            type: 'dashed'       // 明确指定为虚线
+                        }
+                    },
                     series: [{
                         type: 'line',
                         smooth: true,
@@ -693,27 +722,31 @@
             const fetchRealTimeTicks = async () => {
                 await axios.get('/api/trade/realtime-ticks', {
                     ...HTTP_CONFIG,
-                    params: {num_items: 100}
+                    params: {num_items: 20}
                 })
                 .then(response => {
                     const rawData = response.data.data || [];
-                    console.log("fetched ticks...");
+                    console.log("fetched ticks...", rawData.length, " items");
                     if(rawData.length === 0)
                         return;
                     rawData.forEach(item => {
                         const {time, price} = item;
                         const curTimestamp = Math.floor(new Date(time).getTime()/1000) * 1000; //时间戳,精度到秒
-                        chartData.value[curTimestamp] = price // 有，就直接覆盖，没有，就直接添加
+                        chartData[curTimestamp] = price // 有，就直接覆盖，没有，就直接添加
                     })
-                    let sortedTimes = Object.keys(chartData.value).sort();
+                    let sortedTimes = Object.keys(chartData).sort();
+                    if(sortedTimes.length > 3600){ //最多保留3600个元素,删除最早的
+                        delete chartData[sortedTimes[0]]
+                        sortedTimes.shift()
+                    }
                     let sortedTuple = sortedTimes.map((k) => {
                         return[
                             Number(k), // 关键：手动转回数字，确保 ECharts time轴识别准确, 否则传过去的是字符串型！
-                            chartData.value[k]
+                            chartData[k]
                         ]
                     })
-                    console.log("sortedTimes:", sortedTimes.slice(-5))
-                    console.log("sortedTuple:", sortedTuple.slice(-5))
+                    console.log("sortedTimes:", sortedTimes.slice(-2))
+                    console.log("sortedTuple:", sortedTuple.length, sortedTuple.slice(-2))
                     chartInst.value.setOption({
                         //xAxis: {data: sortedTimes},
                         series: [

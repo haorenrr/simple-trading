@@ -13,7 +13,7 @@
     <div class="container-fluid min-vh-100" >
         <div class="row h-100">
             <div class="col-2 d-flex flex-column justify-content-start border-end">
-                <button class="btn btn-primary mt-5" type="button" @click="initAcount">充值</button>
+                <button class="btn btn-primary mt-5" type="button" @click="reCharge">充值</button>
                 <button class="btn btn-info mt-2" type="button" @click="startSim($event)">开始交易</button>
                 <button class="btn btn-danger mt-2" type="button" @click="stopSim">停止</button>
                 <div class="flex-grow-1"></div>
@@ -36,7 +36,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="col-3">
+            <div class="col-3" style="height: 70vh; overflow: auto">
                 <div class="card mt-5">
                     <div class="card-header">
                         充值记录
@@ -76,7 +76,6 @@
             let simStopped = false
             let logId = 100; //自增ID
 
-            const reCharge = ""
             const buy = "/api/trade/buy"
             const sell = "/api/trade/sell"
 
@@ -86,7 +85,7 @@
             const priceList = [5, 10, 15, 20, 30]
             const assetTypeList=['APPL', 'USD']
 
-            async function initAcount(){
+            async function reCharge(){
                 //Recharge for acounts
                 for(const asset of assetTypeList) {
                     for (const item of userIdList) {
@@ -115,6 +114,7 @@
                             rechargeLog.value.push(msg)
                         })
 
+                        if(rechargeLog.value.length > 15){rechargeLog.value.shift()}
                     }
                 }
                 rechargeLog.value.push("recharge over.")
@@ -174,7 +174,7 @@
             return {
                 rechargeLog,
                 reqLogList,
-                initAcount,
+                reCharge,
                 stopSim,
                 startSim,
             }

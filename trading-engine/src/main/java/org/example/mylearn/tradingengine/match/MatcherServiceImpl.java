@@ -108,15 +108,18 @@ public class MatcherServiceImpl implements MatcherService {
         int pickedTicks = 0;
 
         var ssTradingDetailList = tradingDetailList.snapshot();
-        for(var item : ssTradingDetailList){
+        ListIterator<TradingDetail> it = ssTradingDetailList.listIterator(ssTradingDetailList.size());
+        //for(var item : ssTradingDetailList){
+        while (it.hasPrevious()){
+            TradingDetail item = it.previous();
             if(item.getUpdatedAt().before(start) || pickedTicks >= numTicks){
                 return Result.ok(ticks);
             }
             var tick = new RealTimeTick();
+            tick.setId(sequenceService.newSequence());
             tick.setTime(item.getUpdatedAt());
             tick.setPrice(item.getPrice());
             tick.setAmount(item.getAmount());
-            tick.setId(sequenceService.newSequence());
             ticks.add(tick);
             pickedTicks++;
         }
