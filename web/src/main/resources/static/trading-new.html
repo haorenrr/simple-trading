@@ -435,6 +435,8 @@
     let pollingInterval = 3000
     let dataInited = false  // run at least once! for data init case
 
+    let errorCnt = 0;
+
     const appData = {
         data(){
             return {
@@ -472,7 +474,8 @@
                         this.fetchAssetItems(),
                         this.fetchQuatationItems(),
                         this.fetchOrderList(),
-                        this.fetchFinishedDetails()
+                        this.fetchFinishedDetails(),
+                        this.isServerAlive()
                     ]);
                     console.log("Fetch data(s) and await over.")
                 }catch(err){
@@ -607,6 +610,18 @@
                 .catch(error => {
                     console.error("fetch finished details fail!", error);
                 })
+            },
+            async isServerAlive(){
+                await axios.get('/api/hello', HTTP_CONFIG)
+                .then(response => {
+                    errorCnt = 0;
+                })
+                .catch(error => {
+                    if(++errorCnt >= 20){
+                        stopPolling = true;
+                        console.error("Server response error for a long time, stop polling data.");
+                    }
+                })
             }
         },
         computed:{},
@@ -720,6 +735,10 @@
             };
 
             const fetchRealTimeTicks = async () => {
+                if(stopPolling) {
+                    clearInterval(tickTimer); // 销毁组件时清除定时器
+                    return
+                }
                 await axios.get('/api/trade/realtime-ticks', {
                     ...HTTP_CONFIG,
                     params: {num_items: 20}

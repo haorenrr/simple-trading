@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -46,10 +47,9 @@ public class OpenApiController {
 
     @Operation(summary = "HELLO", description = "保活测试") // For Swagger UI(SpringDOC)
     @GetMapping("/hello")
-    public Result<String> hello() {
-        String uid = UserContext.getUserId();
-        return  Result.ok("hello '%s', from %s"
-                .formatted(uid == null ? "NULL" : uid, this.getClass().getName()));
+    public Result<Long> hello() { //可用于保活测试
+        Date now = new Date();
+        return  Result.ok(now.getTime());
     }
 
     @GetMapping("/trade/buy")
