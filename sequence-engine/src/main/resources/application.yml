@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: sequence-engine
+
+Logging:
+  level:
+    root: info
+    org.example.mylearn: debug
+
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: alpha
+server:
+  port: 8081

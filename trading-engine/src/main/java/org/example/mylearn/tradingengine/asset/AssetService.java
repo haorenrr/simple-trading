@@ -6,7 +6,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.mylearn.common.ErrorCode;
 import org.example.mylearn.common.Result;
-import org.example.mylearn.sequenceengine.SequenceService;
+import org.example.mylearn.tradingengine.rpcclient.SequenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +16,11 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 @Service
 public class AssetService {
+    //@Autowired
+    //private SequenceService sequenceService;
     @Autowired
     private SequenceService sequenceService;
 

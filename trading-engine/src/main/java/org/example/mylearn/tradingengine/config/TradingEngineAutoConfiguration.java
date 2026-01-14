@@ -1,6 +1,5 @@
 package org.example.mylearn.tradingengine.config;
 
-import org.example.mylearn.sequenceengine.SequenceService;
 import org.example.mylearn.tradingengine.asset.AssetService;
 import org.example.mylearn.tradingengine.clearing.ClearingServiceImpl;
 import org.example.mylearn.tradingengine.engine.TradingServiceImpl;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Import;
         AssetService.class,
         MatcherServiceImpl.class,
         ClearingServiceImpl.class,
-        SequenceService.class
+        RpcClientConfiguration.class
 })
 public class TradingEngineAutoConfiguration {
     /**

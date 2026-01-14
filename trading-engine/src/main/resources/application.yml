@@ -15,3 +15,14 @@ logging:
   level:
     root: info                    # 全局保持 INFO，避免系统日志泛滥
     org.example.mylearn: debug  # 针对你的业务逻辑包开启 DEBUG
+#    org.springframework.cloud.openfeign: debug
+
+feign:
+  client:
+    config:
+      default:
+        connectionTimeout: 5000
+        readTimeout: 5000
+  httpClient:
+    enabled:true
+

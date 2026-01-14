@@ -1,7 +1,6 @@
 package org.example.mylearn.tradingengine.engine;
 
 import org.example.mylearn.common.Result;
-import org.example.mylearn.sequenceengine.SequenceService;
 import org.example.mylearn.tradingengine.match.MatcherService;
 import org.example.mylearn.tradingengine.match.QuotationInfo;
 import org.example.mylearn.tradingengine.match.RealTimeTick;
@@ -9,6 +8,7 @@ import org.example.mylearn.tradingengine.match.TradingDetail;
 import org.example.mylearn.tradingengine.order.OrderEntity;
 import org.example.mylearn.tradingengine.order.OrderService;
 import org.example.mylearn.tradingengine.order.TradeType;
+import org.example.mylearn.tradingengine.rpcclient.SequenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
