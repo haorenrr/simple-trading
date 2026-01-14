@@ -9,7 +9,7 @@
         <relativePath>../parent/pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>sequence-engine</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${project.version}</version>
     <name>sequence-engine</name>
     <description>sequence-engine</description>
     <packaging>jar</packaging>

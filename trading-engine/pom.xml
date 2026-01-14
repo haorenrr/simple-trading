@@ -9,7 +9,7 @@
         <relativePath>../parent/pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>trading-engine</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${project.version}</version>
     <name>trading-engine</name>
     <description>trading-engine</description>
 
@@ -17,12 +17,6 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -34,13 +28,6 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>-->
-
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.13.2</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -55,12 +42,10 @@
         <dependency>
             <groupId>org.example.mylearn</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.example.mylearn</groupId>
             <artifactId>sequence-engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>openapi</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${project.version}</version>
     <name>openapi</name>
     <description>openapi</description>
 
@@ -35,13 +35,10 @@
         <dependency>
             <groupId>org.example.mylearn</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.example.mylearn</groupId>
             <artifactId>trading-engine</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

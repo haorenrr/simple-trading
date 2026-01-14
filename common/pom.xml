@@ -9,7 +9,7 @@
         <relativePath>../parent/pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>common</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${project.version}</version>
     <name>common</name>
     <description>common</description>
 
