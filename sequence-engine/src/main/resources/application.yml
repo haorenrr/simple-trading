@@ -13,5 +13,6 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
     operations-sorter: alpha
+
 server:
   port: 8081
