@@ -1,17 +1,23 @@
 #!/bin/bash
 
+mkdir -p logs 
+PID_FILE="logs/pids.txt"
+> "$PID_FILE"
 
-SERVICE1="./sequence-engine/target/sequence-engine-1.0.0-SNAPSHOT-exec.jar"
-SERVICE2="./web/target/web-1.0.0-SNAPSHOT.jar"
-
+SERVICES=(
+  "java -jar ./registry-server/target/registry-server-1.0.0-SNAPSHOT.jar"
+  "java -jar ./sequence-engine/target/sequence-engine-1.0.0-SNAPSHOT-exec.jar"
+  "java -jar ./web/target/web-1.0.0-SNAPSHOT.jar"
+)
 
 echo "Starting services..."
 
-nohup java -jar "$SERVICE1" > /dev/null 2>&1 &
-echo "$SERVICE1 started, pid=$!"
-
-nohup java -jar "$SERVICE2" > /dev/null 2>&1 &
-echo "$SERVICE2 started, pid=$!"
+for CMD in "${SERVICES[@]}"; do
+  nohup $CMD >/dev/null 2>&1 &
+  PID=$!
+  echo "$PID" >> "$PID_FILE"
+  echo "[$CMD] started, pid=$PID"
+  sleep 15
+done
 
 echo "All services started."
-

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: registry-server
+server:
+  port: 9100
+eureka:
+  client:
+    fetch-registry: false
+    register-with-eureka: false

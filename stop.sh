@@ -1,26 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+PID_FILE="logs/pids.txt"
+
+if [ ! -f "$PID_FILE" ]; then
+  echo "No pid file found."
+  exit 0
+fi
 
 echo "Stopping services..."
 
-SERVICE1="./sequence-engine/target/sequence-engine-1.0.0-SNAPSHOT-exec.jar"
-SERVICE2="./web/target/web-1.0.0-SNAPSHOT.jar"
+while read -r PID; do
+  if ps -p "$PID" > /dev/null 2>&1; then
+    kill "$PID"
+    echo "Stopped pid=$PID"
+  fi
+done < "$PID_FILE"
 
-pids=$(ps -ef | grep java | grep -E "$SERVICE1|$SEVICE2" | grep -v grep | awk '{print $2}')
-
-if [ -z "$pids" ]; then
-  echo "No matching services found."
-fi
-
-echo "Found pids: $pids"
-kill $pids
-
-sleep 2
-
-# 如果还没停，强杀
-pids_left=$(ps -ef | grep java | grep -E "$SERVICE1|$SERVICE2" | grep -v grep | awk '{print $2}')
-if [ -n "$pids_left" ]; then
-  kill -9 $pids_left
-fi
-
-echo "Services stopped."
+rm -f "$PID_FILE"
+echo "All services stopped."
 
