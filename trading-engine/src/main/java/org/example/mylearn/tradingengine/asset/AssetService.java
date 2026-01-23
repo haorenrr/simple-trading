@@ -116,6 +116,7 @@ public class AssetService {
             logger.debug(msg);
             return Result.fail(null, ErrorCode.INVALID_PARAM, msg);
         }
+        if(amount.signum() == 0) return Result.ok(null); // do nothing for zero transfer
 
         var fromAssetResult = getAssetByUidAndType(fromUserId, assetType);
         AssetEntity fromAsset = fromAssetResult.getData();

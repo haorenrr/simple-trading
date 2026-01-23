@@ -8,6 +8,9 @@ import org.example.mylearn.tradingengine.asset.AssetService;
 import org.example.mylearn.tradingengine.asset.AssetTransferType;
 import org.example.mylearn.tradingengine.asset.AssetType;
 import org.example.mylearn.tradingengine.order.OrderEntity;
+import org.example.mylearn.tradingengine.order.TradeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -21,6 +24,7 @@ public class ClearingServiceImpl implements ClearingService {
     @Autowired
     AssetService assetService;
     static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    Logger logger = LoggerFactory.getLogger(ClearingServiceImpl.class);
 
     @Override
     public Result<OrderEntity> prepareTrading(OrderEntity orderEntity) {
@@ -44,46 +48,34 @@ public class ClearingServiceImpl implements ClearingService {
 
     @Override
     public Result<Void> finishTrading(OrderEntity orderFrom, List<OrderEntity> matchedOrders) {
-
+        // for the compilcated of the logic before and afer, we do some consistence check here!
         matchedOrders.forEach(order -> Assert.notNull(order, "order is null in matchedOrders"));
-
-        BigDecimal tradingvalue = matchedOrders.stream().filter(Objects::nonNull).map(OrderEntity::getProcessingAmount)
+        BigDecimal tradingvalue = matchedOrders.stream().map(OrderEntity::getProcessingAmount)
                 .filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if(tradingvalue.compareTo(orderFrom.getProcessingAmount()) != 0){
-            String msg = "Trading value not consistent! 'from' side {%s}, 'to' side {%s}. Detailed info: orderFrom=%s, matchedOrders=%s"
-                    .formatted(orderFrom.getProcessingAmount(), tradingvalue, GSON.toJson(orderFrom), GSON.toJson(matchedOrders));
-            return Result.fail(null, ErrorCode.INTERNAL_ERROR, msg);
-        }
+        Assert.isTrue(tradingvalue.compareTo(orderFrom.getProcessingAmount()) == 0,
+            "Trading value not consistent! 'from' side {%s}, 'to' side {%s}. Detailed info: orderFrom=%s, matchedOrders=%s"
+                .formatted(orderFrom.getProcessingAmount(), tradingvalue, GSON.toJson(orderFrom), GSON.toJson(matchedOrders)));
+        TradeType takerType = orderFrom.getTradeType();
+        Assert.isTrue(takerType == TradeType.BUY || takerType == TradeType.SELL,
+                "invald TradeType: %s, order=%s".formatted(orderFrom.getTradeType(), GSON.toJson(orderFrom)));
 
         matchedOrders.forEach(orderTo -> {
-            switch (orderFrom.getTradeType()) {
-                case BUY -> {
-                    //按照卖家的价格成交
-                    assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, orderFrom.getUid(), orderTo.getUid(),
-                            AssetType.USD, orderTo.getProcessingAmount().multiply(orderTo.getPrice()));
-                    assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, orderTo.getUid(), orderFrom.getUid(),
-                            AssetType.APPL, orderTo.getProcessingAmount());
-                    //因为以卖家价格成交，因此买单冻结的资金可能没用完，对于买单，挂单价和成交价之间的差价解冻
-                    Assert.isTrue(orderFrom.getPrice().compareTo(orderTo.getPrice()) >= 0,
-                            "BUY price must be greater than sell price. buyOrder=%s, sellOrder=%s".formatted(GSON.toJson(orderFrom), GSON.toJson(orderTo)));
-                    assetService.unfreeze(orderFrom.getUid(), AssetType.USD,
-                            orderTo.getProcessingAmount().multiply(orderFrom.getPrice().subtract(orderTo.getPrice())));
-                }
-                case SELL -> {
-                    assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, orderFrom.getUid(), orderTo.getUid(),
-                            AssetType.APPL, orderTo.getProcessingAmount());
-                    assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, orderTo.getUid(), orderFrom.getUid(),
-                            AssetType.USD, orderTo.getProcessingAmount().multiply(orderFrom.getPrice()));
-                    // 按照卖单价成交，买单可能还有额外的冻结，解冻
-                    Assert.isTrue(orderTo.getPrice().compareTo(orderFrom.getPrice()) >= 0,
-                            "BUY price must be greater than SELL price. buyOrder=%s, sellOrder=%s".formatted(GSON.toJson(orderTo), GSON.toJson(orderFrom)));
-                    assetService.unfreeze(orderTo.getUid(), AssetType.USD,
-                            orderTo.getProcessingAmount().multiply(orderTo.getPrice().subtract(orderFrom.getPrice())));
-                }
-                default -> {
-                    var msg = "invald TradeType: %s, order=%s".formatted(orderFrom.getTradeType(), GSON.toJson(orderFrom));
-                    throw new IllegalStateException(msg);
-                }
+            var dealPrice = orderTo.getPrice();
+            var dealAmount = orderTo.getProcessingAmount();
+            var buyer = (takerType == TradeType.BUY) ? orderFrom : orderTo;
+            var seller = (takerType == TradeType.SELL) ? orderFrom : orderTo;
+            // always transfer USD from buyer to seller, and vice versa for goods(APPL)
+            assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, buyer.getUid(), seller.getUid(),
+                    AssetType.USD, dealPrice.multiply(dealAmount));
+            assetService.transferBetweenUsers(AssetTransferType.FROZEN_TO_AVAILABLE, seller.getUid(), buyer.getUid(),
+                    AssetType.APPL, dealAmount);
+            if(orderFrom.getTradeType() == TradeType.BUY){
+                // deal with seller's price, it may frize too much ealier,give it back
+                Assert.isTrue(orderFrom.getPrice().compareTo(orderTo.getPrice()) >= 0,
+                        "BUY price must be greater than sell price. buyOrder=%s, sellOrder=%s".formatted(GSON.toJson(orderFrom), GSON.toJson(orderTo)));
+                assetService.unfreeze(orderFrom.getUid(), AssetType.USD,
+                        orderTo.getProcessingAmount().multiply(orderFrom.getPrice().subtract(orderTo.getPrice())));
+
             }
         });
         return Result.ok(null);

@@ -214,7 +214,7 @@ public class MatcherServiceImpl implements MatcherService {
             }
 
             QuotationItem newItem = new QuotationItem(order.getPrice(), order.getAmount(), order.getTradeType(),new ArrayList<>());
-            if(!otherDirQ.headSet(newItem, true).isEmpty()){
+            if(!otherDirQ.headSet(newItem, true).isEmpty()){ // retieve all possible orders by prices
                 processMatch(order);
                 if(order.getStatus() == OrderStatus.FINISHED) {
                     Assert.isTrue(
